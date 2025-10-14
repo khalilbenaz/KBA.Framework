@@ -1,0 +1,6 @@
+@KBA.Framework.Api_HostAddress = http://localhost:5220
+
+GET {{KBA.Framework.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
