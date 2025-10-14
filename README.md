@@ -196,7 +196,7 @@ Toutes les tables utilisent le préfixe **KBA.**
 #### 1. Cloner ou télécharger le projet
 
 ```bash
-git clone https://github.com/votre-repo/KBA.Framework.git
+git clone https://github.com/khalilbenaz/KBA.Framework.git
 cd KBA.Framework
 ```
 
