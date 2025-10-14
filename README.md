@@ -685,24 +685,6 @@ Consulter les logs dans: `C:\inetpub\wwwroot\KBAFramework\logs\`
 - [Domain-Driven Design Reference](https://www.domainlanguage.com/ddd/)
 - [Entity Framework Core Docs](https://docs.microsoft.com/ef/core/)
 
-## 📄 Licence
-
-Ce projet est sous licence MIT. Voir le fichier LICENSE pour plus de détails.
-
-## 👥 Contribution
-
-Les contributions sont les bienvenues! Merci de:
-1. Fork le projet
-2. Créer une branche pour votre fonctionnalité (`git checkout -b feature/amazing-feature`)
-3. Commit vos changements (`git commit -m 'Add amazing feature'`)
-4. Push vers la branche (`git push origin feature/amazing-feature`)
-5. Ouvrir une Pull Request
-
-## 📧 Support
-
-Pour toute question ou problème:
-- Ouvrir une issue sur GitHub
-- Email: contact@kba-framework.com
 
 ---
 
