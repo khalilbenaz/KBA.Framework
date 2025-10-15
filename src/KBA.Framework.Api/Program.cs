@@ -66,10 +66,11 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(options =>
+    app.UseReDoc(options =>
     {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "KBA Framework API v1");
-        options.RoutePrefix = "swagger";
+        options.SpecUrl = "/swagger/v1/swagger.json";
+        options.DocumentTitle = "KBA Framework API v1";
+        options.RoutePrefix = string.Empty; // Ouvre automatiquement à la racine "/"
     });
 }
 
