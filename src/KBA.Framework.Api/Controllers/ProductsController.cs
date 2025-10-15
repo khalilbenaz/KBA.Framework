@@ -12,7 +12,7 @@ namespace KBA.Framework.Api.Controllers;
 [Route("api/[controller]")]
 [Produces("application/json")]
 [Authorize]
-[ApiExplorerSettings(GroupName = "Products")]
+[Tags("Products")]
 public class ProductsController : ControllerBase
 {
     private readonly IProductService _productService;

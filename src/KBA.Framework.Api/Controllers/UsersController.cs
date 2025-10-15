@@ -12,7 +12,7 @@ namespace KBA.Framework.Api.Controllers;
 [Route("api/[controller]")]
 [Produces("application/json")]
 [Authorize]
-[ApiExplorerSettings(GroupName = "Users")]
+[Tags("Users")]
 public class UsersController : ControllerBase
 {
     private readonly IUserService _userService;

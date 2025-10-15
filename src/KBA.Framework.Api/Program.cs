@@ -45,7 +45,7 @@ try
     builder.Services.AddScoped<IAuthService, AuthService>();
     builder.Services.AddScoped<JwtTokenService>();
 
-    // Controllers avec FluentValidation
+    // Controllers avec FluentValidation et découverte API
     builder.Services.AddControllers();
     
     // FluentValidation
@@ -84,6 +84,13 @@ try
 
     // Swagger/OpenAPI avec support JWT
     builder.Services.AddEndpointsApiExplorer();
+    
+    // Configuration pour exposer tous les endpoints
+    builder.Services.Configure<Microsoft.AspNetCore.Mvc.ApiBehaviorOptions>(options =>
+    {
+        options.SuppressMapClientErrors = false;
+    });
+    
     builder.Services.AddSwaggerGen(options =>
     {
         options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
@@ -130,33 +137,11 @@ try
             }
         });
 
-        // Configurer les tags personnalisés pour les contrôleurs
-        options.TagActionsBy(api =>
-        {
-            if (api.GroupName != null)
-            {
-                return new[] { api.GroupName };
-            }
-
-            if (api.ActionDescriptor is Microsoft.AspNetCore.Mvc.Controllers.ControllerActionDescriptor controllerActionDescriptor)
-            {
-                var controllerName = controllerActionDescriptor.ControllerName;
-                // Mapper les noms de contrôleurs vers des tags lisibles
-                return controllerName switch
-                {
-                    "Auth" => new[] { "Authentication" },
-                    "Products" => new[] { "Products" },
-                    "Users" => new[] { "Users" },
-                    "Init" => new[] { "Initialization" },
-                    _ => new[] { controllerName }
-                };
-            }
-
-            return new[] { "Default" };
-        });
-
-        // Ordre des tags dans la documentation
-        options.OrderActionsBy(api => api.GroupName ?? api.RelativePath);
+        // Les tags sont maintenant définis directement via [Tags] sur les contrôleurs
+        // Pas besoin de TagActionsBy personnalisé
+        
+        // Configurer l'inclusion de tous les endpoints
+        options.DocInclusionPredicate((docName, apiDesc) => true);
 
         // Inclure les commentaires XML
         var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";

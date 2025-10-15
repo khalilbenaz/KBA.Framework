@@ -11,7 +11,7 @@ namespace KBA.Framework.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
-[ApiExplorerSettings(GroupName = "Initialization")]
+[Tags("Initialization")]
 public class InitController : ControllerBase
 {
     private readonly IUserService _userService;

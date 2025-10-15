@@ -11,7 +11,7 @@ namespace KBA.Framework.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
-[ApiExplorerSettings(GroupName = "Authentication")]
+[Tags("Authentication")]
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
