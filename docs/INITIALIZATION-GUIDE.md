@@ -1,22 +1,42 @@
 # Guide d'initialisation - KBA Framework
 
-Ce guide vous explique comment initialiser le système KBA Framework pour la première utilisation.
+Guide complet pour initialiser votre système KBA Framework et créer le premier utilisateur administrateur.
 
 ## 📋 Table des matières
 
 - [Vue d'ensemble](#vue-densemble)
-- [Prérequis](#prérequis)
+- [Méthode rapide (Recommandée)](#méthode-rapide-recommandée)
 - [Méthode 1 : Via Swagger UI](#méthode-1--via-swagger-ui)
 - [Méthode 2 : Via ReDoc](#méthode-2--via-redoc)
 - [Méthode 3 : Via cURL](#méthode-3--via-curl)
-- [Méthode 4 : Via PowerShell](#méthode-4--via-powershell)
-- [Vérification de l'initialisation](#vérification-de-linitialisation)
-- [Connexion après initialisation](#connexion-après-initialisation)
+- [Vérification et connexion](#vérification-et-connexion)
 - [Dépannage](#dépannage)
 
 ## Vue d'ensemble
 
-Lors de la première utilisation du KBA Framework, vous devez créer le **premier utilisateur administrateur**. Cet utilisateur aura tous les privilèges nécessaires pour gérer le système.
+Lors de la première utilisation, vous devez créer le **premier utilisateur administrateur**. 
+
+**Important** : 
+- ✅ Une seule chaîne de connexion dans `appsettings.json` (section `ConnectionStrings`)
+- ✅ Tags personnalisés dans Swagger (Authentication, Users, Products, Initialization)
+- ✅ Page d'accueil disponible sur `http://localhost:5220`
+- ✅ Test JWT fonctionnel dans Swagger et ReDoc
+
+## Méthode rapide (Recommandée)
+
+### Via le script PowerShell
+
+```powershell
+.\init-first-admin.ps1
+```
+
+Le script vous guide automatiquement :
+1. Vérifie la connexion à l'API
+2. Vérifie le statut d'initialisation
+3. Demande vos informations
+4. Crée l'utilisateur
+5. Teste la connexion
+6. Affiche un résumé
 
 ## Prérequis
 
@@ -151,73 +171,10 @@ curl -X GET "http://localhost:5220/api/users" \
   -H "accept: application/json"
 ```
 
-## Méthode 4 : Via PowerShell
 
-### Script d'initialisation complet
+## Vérification et connexion
 
-```powershell
-# Configuration
-$baseUrl = "http://localhost:5220"
-$adminUser = @{
-    userName = "admin"
-    email = "admin@kba-framework.com"
-    password = "Admin@123456"
-    firstName = "Admin"
-    lastName = "System"
-    phoneNumber = "+33612345678"
-}
-
-# 1. Vérifier le statut
-Write-Host "Vérification du statut d'initialisation..." -ForegroundColor Yellow
-$statusResponse = Invoke-RestMethod -Uri "$baseUrl/api/init/status" -Method Get
-Write-Host "Status: $($statusResponse.message)" -ForegroundColor Green
-
-if ($statusResponse.needsInitialization) {
-    # 2. Créer le premier administrateur
-    Write-Host "`nCréation du premier administrateur..." -ForegroundColor Yellow
-    $createResponse = Invoke-RestMethod -Uri "$baseUrl/api/init/first-admin" `
-        -Method Post `
-        -ContentType "application/json" `
-        -Body ($adminUser | ConvertTo-Json)
-    Write-Host "Utilisateur créé: $($createResponse.user.userName)" -ForegroundColor Green
-
-    # 3. Se connecter
-    Write-Host "`nConnexion..." -ForegroundColor Yellow
-    $loginData = @{
-        userName = $adminUser.userName
-        password = $adminUser.password
-    }
-    $loginResponse = Invoke-RestMethod -Uri "$baseUrl/api/auth/login" `
-        -Method Post `
-        -ContentType "application/json" `
-        -Body ($loginData | ConvertTo-Json)
-    
-    Write-Host "Token obtenu!" -ForegroundColor Green
-    Write-Host "Token: $($loginResponse.token)" -ForegroundColor Cyan
-    
-    # 4. Tester avec le token
-    Write-Host "`nTest de l'authentification..." -ForegroundColor Yellow
-    $headers = @{
-        "Authorization" = "Bearer $($loginResponse.token)"
-    }
-    $usersResponse = Invoke-RestMethod -Uri "$baseUrl/api/users" `
-        -Method Get `
-        -Headers $headers
-    
-    Write-Host "Nombre d'utilisateurs: $($usersResponse.Count)" -ForegroundColor Green
-    Write-Host "`n✅ Initialisation terminée avec succès!" -ForegroundColor Green
-} else {
-    Write-Host "`n⚠️  Le système est déjà initialisé." -ForegroundColor Yellow
-}
-```
-
-Sauvegardez ce script dans `init.ps1` et exécutez-le :
-
-```powershell
-.\init.ps1
-```
-
-## Vérification de l'initialisation
+### Vérifier le statut d'initialisation
 
 À tout moment, vous pouvez vérifier le statut d'initialisation :
 
@@ -240,15 +197,25 @@ Réponse attendue après initialisation :
 }
 ```
 
-## Connexion après initialisation
+### Se connecter après initialisation
 
-Une fois le premier administrateur créé, vous ne pouvez plus utiliser l'endpoint `/api/init/first-admin`.
+**Via Swagger/ReDoc :**
+1. Endpoint `/api/auth/login` avec vos identifiants
+2. Copiez le token JWT reçu
+3. Cliquez sur "Authorize" en haut de la page
+4. Entrez : `Bearer VOTRE_TOKEN`
 
-Pour vous connecter :
+**Via cURL :**
+```bash
+# Obtenir le token
+TOKEN=$(curl -X POST http://localhost:5220/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"userName":"admin","password":"Admin@123456"}' | jq -r '.token')
 
-1. Utilisez `/api/auth/login` avec vos identifiants
-2. Récupérez le token JWT
-3. Utilisez le token dans l'en-tête Authorization : `Bearer VOTRE_TOKEN`
+# Utiliser le token
+curl http://localhost:5220/api/users \
+  -H "Authorization: Bearer $TOKEN"
+```
 
 ## Dépannage
 
@@ -294,39 +261,21 @@ dotnet run --project src/KBA.Framework.Api
 - Reconnectez-vous via `/api/auth/login`
 - Vérifiez que vous utilisez le format correct : `Bearer VOTRE_TOKEN`
 
-## Recommandations de sécurité
+## 🎯 Prochaines étapes
 
-### ⚠️ Important pour la production
+Après l'initialisation :
 
-1. **Changez immédiatement le mot de passe par défaut**
-2. **Utilisez un email valide** pour la récupération de compte
-3. **Configurez HTTPS** pour toutes les communications
-4. **Limitez l'accès** à l'endpoint d'initialisation en production
-5. **Activez la journalisation** des tentatives de connexion
-6. **Configurez la rotation des tokens** JWT
+1. **Changez le mot de passe par défaut** (sécurité)
+2. **Créez d'autres utilisateurs** via `/api/users`
+3. **Explorez l'API** via Swagger (`/swagger`) ou ReDoc (`/api-docs`)
+4. **Consultez le README** pour ajouter vos propres entités
 
-### Bonnes pratiques
+## 📚 Ressources
 
-- Créez plusieurs utilisateurs avec des rôles différents
-- N'utilisez pas le compte admin pour les opérations quotidiennes
-- Activez l'authentification à deux facteurs (2FA)
-- Surveillez les logs d'audit pour détecter les activités suspectes
-
-## Prochaines étapes
-
-Après l'initialisation réussie :
-
-1. ✅ Créez d'autres utilisateurs via `/api/users`
-2. ✅ Configurez les rôles et permissions
-3. ✅ Créez des tenants pour le multi-tenancy
-4. ✅ Explorez l'API via Swagger ou ReDoc
-5. ✅ Consultez la documentation complète
-
-## Ressources supplémentaires
-
-- [README.md](../README.md) - Documentation principale
-- [API Documentation](http://localhost:5220/api-docs) - Documentation ReDoc
-- [Swagger UI](http://localhost:5220/swagger) - Interface de test
+- **Page d'accueil** : http://localhost:5220
+- **Swagger UI** : http://localhost:5220/swagger (test interactif)
+- **ReDoc** : http://localhost:5220/api-docs (documentation)
+- **README** : [README.md](../README.md)
 
 ---
 

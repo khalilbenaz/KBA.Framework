@@ -191,6 +191,8 @@ Toutes les tables utilisent le préfixe **KBA.**
 - Visual Studio 2022+ ou VS Code (optionnel)
 - Git (optionnel)
 
+> **⚠️ Important** : À la première utilisation, vous devez créer le premier utilisateur administrateur. Consultez la section [Initialiser le système](#initialiser-le-système-première-utilisation) ci-dessous.
+
 ### Installation en 5 minutes
 
 #### 1. Cloner ou télécharger le projet
@@ -214,9 +216,20 @@ dotnet restore
 {
   "ConnectionStrings": {
     "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=KBAFrameworkDb;Trusted_Connection=true;MultipleActiveResultSets=true;TrustServerCertificate=true"
+  },
+  "DatabaseSettings": {
+    "CommandTimeout": 30,
+    "EnableRetryOnFailure": true,
+    "MaxRetryCount": 3,
+    "MaxRetryDelay": "00:00:05",
+    "EnableSensitiveDataLogging": false,
+    "EnableDetailedErrors": false,
+    "MigrationsAssembly": "KBA.Framework.Infrastructure"
   }
 }
 ```
+
+**Note** : La chaîne de connexion est dans `ConnectionStrings:DefaultConnection`. Les paramètres additionnels sont dans `DatabaseSettings`.
 
 #### 4. Créer la base de données
 
@@ -297,6 +310,23 @@ curl http://localhost:5220/api/products
 ```
 
 📚 **Guide détaillé** : Consultez [docs/INITIALIZATION-GUIDE.md](./docs/INITIALIZATION-GUIDE.md) pour plus d'informations.
+
+### ❓ FAQ Rapide
+
+**Q : Comment créer le premier utilisateur ?**  
+R : Utilisez le script `.\init-first-admin.ps1` ou l'endpoint `/api/init/first-admin`
+
+**Q : Comment tester l'API avec authentification ?**  
+R : 
+1. Connectez-vous via `/api/auth/login` pour obtenir un token
+2. Dans Swagger/ReDoc, cliquez sur "Authorize" 
+3. Entrez : `Bearer VOTRE_TOKEN`
+
+**Q : Le tag "KBA.Framework.Api" apparaît dans Swagger ?**  
+R : Non, les tags sont maintenant personnalisés (Authentication, Users, Products, Initialization)
+
+**Q : Où est la page d'accueil ?**  
+R : Ouvrez `http://localhost:5220` - elle affiche la navigation et le guide de démarrage
 
 ## 📖 Guide complet
 

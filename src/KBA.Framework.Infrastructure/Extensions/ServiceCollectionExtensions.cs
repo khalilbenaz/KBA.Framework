@@ -19,11 +19,15 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        // Charger les configurations
+        // Charger la chaîne de connexion depuis ConnectionStrings
+        var connectionString = configuration.GetConnectionString("DefaultConnection") 
+            ?? "Server=(localdb)\\mssqllocaldb;Database=KBAFrameworkDb;Trusted_Connection=true;MultipleActiveResultSets=true;TrustServerCertificate=true";
+
+        // Charger les configurations de la base de données
         var dbSection = configuration.GetSection("DatabaseSettings");
         var dbSettings = new DatabaseSettings
         {
-            ConnectionString = dbSection["ConnectionString"] ?? "Server=(localdb)\\mssqllocaldb;Database=KBAFrameworkDb;Trusted_Connection=true;MultipleActiveResultSets=true;TrustServerCertificate=true",
+            ConnectionString = connectionString,
             CommandTimeout = int.Parse(dbSection["CommandTimeout"] ?? "30"),
             EnableRetryOnFailure = bool.Parse(dbSection["EnableRetryOnFailure"] ?? "true"),
             MaxRetryCount = int.Parse(dbSection["MaxRetryCount"] ?? "3"),
