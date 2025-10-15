@@ -245,8 +245,9 @@ dotnet run --project src/KBA.Framework.Api
 
 L'API sera accessible sur:
 - **Page d'accueil**: http://localhost:5220
+- **API Explorer (Tests interactifs)**: http://localhost:5220/api-explorer.html ⭐ **Recommandé**
 - **Swagger UI**: http://localhost:5220/swagger
-- **ReDoc**: http://localhost:5220/api-docs
+- **ReDoc (Documentation)**: http://localhost:5220/api-docs
 
 ### Initialiser le système (Première utilisation)
 
@@ -316,11 +317,19 @@ curl http://localhost:5220/api/products
 **Q : Comment créer le premier utilisateur ?**  
 R : Utilisez le script `.\init-first-admin.ps1` ou l'endpoint `/api/init/first-admin`
 
+**Q : Quelle interface utiliser pour tester l'API ?**  
+R : **API Explorer** (`/api-explorer.html`) - Interface moderne avec tous les endpoints, authentification JWT, et tests en un clic !
+
 **Q : Comment tester l'API avec authentification ?**  
 R : 
-1. Connectez-vous via `/api/auth/login` pour obtenir un token
-2. Dans Swagger/ReDoc, cliquez sur "Authorize" 
-3. Entrez : `Bearer VOTRE_TOKEN`
+1. Utilisez l'API Explorer (recommandé) - il gère automatiquement le token
+2. OU dans Swagger : connectez-vous via `/api/auth/login`, cliquez "Authorize" et entrez `Bearer VOTRE_TOKEN`
+
+**Q : Quelle est la différence entre Swagger, ReDoc et API Explorer ?**  
+R : 
+- **API Explorer** ⭐ : Interface interactive moderne pour tester tous les endpoints
+- **Swagger UI** : Documentation interactive standard OpenAPI
+- **ReDoc** : Documentation élégante en lecture seule
 
 **Q : Le tag "KBA.Framework.Api" apparaît dans Swagger ?**  
 R : Non, les tags sont maintenant personnalisés (Authentication, Users, Products, Initialization)

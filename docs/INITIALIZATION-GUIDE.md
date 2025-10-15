@@ -273,9 +273,18 @@ Après l'initialisation :
 ## 📚 Ressources
 
 - **Page d'accueil** : http://localhost:5220
-- **Swagger UI** : http://localhost:5220/swagger (test interactif)
-- **ReDoc** : http://localhost:5220/api-docs (documentation)
+- **API Explorer** : http://localhost:5220/api-explorer.html ⭐ (tests interactifs modernes)
+- **Swagger UI** : http://localhost:5220/swagger (documentation OpenAPI)
+- **ReDoc** : http://localhost:5220/api-docs (documentation élégante)
 - **README** : [README.md](../README.md)
+
+### 💡 Conseil
+
+Pour tester rapidement tous les endpoints avec une interface moderne et intuitive, utilisez **l'API Explorer**. Il affiche tous les contrôleurs (Initialization, Authentication, Users, Products) avec leurs endpoints et permet de :
+- ✅ Voir tous les endpoints groupés par contrôleur
+- ✅ Tester chaque endpoint en un clic
+- ✅ Gérer automatiquement l'authentification JWT
+- ✅ Voir les réponses formatées en temps réel
 
 ---
 

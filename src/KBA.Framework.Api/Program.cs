@@ -199,6 +199,21 @@ try
             options.SpecUrl = "/swagger/v1/swagger.json";
             options.DocumentTitle = "KBA Framework API Documentation";
             options.RoutePrefix = "api-docs";
+            
+            // Options ReDoc pour une meilleure interactivité
+            options.ConfigObject = new Swashbuckle.AspNetCore.ReDoc.ConfigObject
+            {
+                HideDownloadButton = false,
+                ExpandResponses = "200,201",
+                RequiredPropsFirst = true,
+                NoAutoAuth = false,
+                PathInMiddlePanel = false,
+                HideLoading = false,
+                NativeScrollbars = false,
+                DisableSearch = false,
+                OnlyRequiredInSamples = false,
+                SortPropsAlphabetically = true
+            };
         });
     }
 
