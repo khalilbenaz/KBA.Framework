@@ -1,5 +1,6 @@
 using KBA.Framework.Application.DTOs.Users;
 using KBA.Framework.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KBA.Framework.Api.Controllers;
@@ -10,6 +11,8 @@ namespace KBA.Framework.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
+[Authorize]
+[ApiExplorerSettings(GroupName = "Users")]
 public class UsersController : ControllerBase
 {
     private readonly IUserService _userService;

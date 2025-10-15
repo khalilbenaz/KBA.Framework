@@ -12,12 +12,20 @@ namespace KBA.Framework.Application.Tests.Services;
 public class ProductServiceTests
 {
     private readonly Mock<IProductRepository> _mockRepository;
+    private readonly Mock<ICurrentUserContext> _mockUserContext;
     private readonly ProductService _service;
 
     public ProductServiceTests()
     {
         _mockRepository = new Mock<IProductRepository>();
-        _service = new ProductService(_mockRepository.Object);
+        _mockUserContext = new Mock<ICurrentUserContext>();
+        
+        // Configuration par défaut du contexte utilisateur
+        _mockUserContext.Setup(x => x.TenantId).Returns((Guid?)null);
+        _mockUserContext.Setup(x => x.UserId).Returns(Guid.NewGuid());
+        _mockUserContext.Setup(x => x.IsAuthenticated).Returns(true);
+        
+        _service = new ProductService(_mockRepository.Object, _mockUserContext.Object);
     }
 
     [Fact]

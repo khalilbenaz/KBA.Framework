@@ -231,15 +231,58 @@ dotnet run --project src/KBA.Framework.Api
 ```
 
 L'API sera accessible sur:
-- **HTTPS**: https://localhost:5001
-- **Swagger**: https://localhost:5001/swagger
+- **Page d'accueil**: http://localhost:5220
+- **Swagger UI**: http://localhost:5220/swagger
+- **ReDoc**: http://localhost:5220/api-docs
+
+### Initialiser le système (Première utilisation)
+
+**Important** : Vous devez créer le premier utilisateur administrateur avant de pouvoir utiliser l'API.
+
+#### Option 1 : Via l'interface web
+
+1. Ouvrez votre navigateur : `http://localhost:5220`
+2. Cliquez sur **"Swagger UI"**
+3. Dans la section **Initialization**, utilisez `POST /api/init/first-admin`
+4. Créez votre premier administrateur
+
+#### Option 2 : Via cURL
+
+```bash
+# 1. Vérifier le statut
+curl http://localhost:5220/api/init/status
+
+# 2. Créer le premier administrateur
+curl -X POST http://localhost:5220/api/init/first-admin \
+  -H "Content-Type: application/json" \
+  -d '{
+    "userName": "admin",
+    "email": "admin@kba-framework.com",
+    "password": "Admin@123456",
+    "firstName": "Admin",
+    "lastName": "System"
+  }'
+```
+
+### S'authentifier
+
+```bash
+# Obtenir un token JWT
+curl -X POST http://localhost:5220/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "userName": "admin",
+    "password": "Admin@123456"
+  }'
+```
 
 ### Tester l'API
 
 ```bash
-# Créer un produit
-curl -X POST https://localhost:5001/api/products \
+# Créer un produit (nécessite un token JWT)
+curl -X POST http://localhost:5220/api/products \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer VOTRE_TOKEN" \
   -d '{
     "name": "Mon produit",
     "description": "Description",
@@ -249,9 +292,11 @@ curl -X POST https://localhost:5001/api/products \
     "category": "Electronics"
   }'
 
-# Récupérer tous les produits
-curl https://localhost:5001/api/products
+# Récupérer tous les produits (public)
+curl http://localhost:5220/api/products
 ```
+
+📚 **Guide détaillé** : Consultez [docs/INITIALIZATION-GUIDE.md](./docs/INITIALIZATION-GUIDE.md) pour plus d'informations.
 
 ## 📖 Guide complet
 

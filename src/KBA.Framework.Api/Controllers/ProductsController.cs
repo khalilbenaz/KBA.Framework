@@ -1,5 +1,6 @@
 using KBA.Framework.Application.DTOs.Products;
 using KBA.Framework.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KBA.Framework.Api.Controllers;
@@ -10,6 +11,8 @@ namespace KBA.Framework.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
+[Authorize]
+[ApiExplorerSettings(GroupName = "Products")]
 public class ProductsController : ControllerBase
 {
     private readonly IProductService _productService;
@@ -30,6 +33,7 @@ public class ProductsController : ControllerBase
     /// <returns>Liste des produits</returns>
     /// <response code="200">Retourne la liste des produits</response>
     [HttpGet]
+    [AllowAnonymous]
     [ProducesResponseType(typeof(List<ProductDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<List<ProductDto>>> GetAll(CancellationToken cancellationToken)
     {

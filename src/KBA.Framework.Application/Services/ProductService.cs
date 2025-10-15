@@ -10,13 +10,15 @@ namespace KBA.Framework.Application.Services;
 public class ProductService : IProductService
 {
     private readonly IProductRepository _productRepository;
+    private readonly ICurrentUserContext _currentUserContext;
 
     /// <summary>
     /// Constructeur
     /// </summary>
-    public ProductService(IProductRepository productRepository)
+    public ProductService(IProductRepository productRepository, ICurrentUserContext currentUserContext)
     {
         _productRepository = productRepository;
+        _currentUserContext = currentUserContext;
     }
 
     /// <inheritdoc />
@@ -46,9 +48,8 @@ public class ProductService : IProductService
         if (dto == null)
             throw new ArgumentNullException(nameof(dto));
 
-        // Note: TenantId et UserId devraient être récupérés du contexte de l'utilisateur connecté
         var product = new Product(
-            tenantId: null, // À remplacer par le TenantId du contexte
+            tenantId: _currentUserContext.TenantId,
             name: dto.Name,
             price: dto.Price,
             stock: dto.Stock

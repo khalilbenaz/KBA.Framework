@@ -42,6 +42,12 @@ public class JwtTokenService
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
+        // Ajouter le TenantId si présent
+        if (user.TenantId.HasValue)
+        {
+            claims.Add(new Claim("TenantId", user.TenantId.Value.ToString()));
+        }
+
         var token = new JwtSecurityToken(
             issuer: issuer,
             audience: audience,

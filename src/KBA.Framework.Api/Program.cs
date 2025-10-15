@@ -35,6 +35,10 @@ try
     builder.Services.AddScoped<IProductRepository, ProductRepository>();
     builder.Services.AddScoped<IUserRepository, UserRepository>();
 
+    // Enregistrement du contexte utilisateur
+    builder.Services.AddHttpContextAccessor();
+    builder.Services.AddScoped<ICurrentUserContext, CurrentUserContext>();
+
     // Enregistrement des services
     builder.Services.AddScoped<IProductService, ProductService>();
     builder.Services.AddScoped<IUserService, UserService>();
@@ -86,7 +90,12 @@ try
         {
             Title = "KBA Framework API",
             Version = "v1",
-            Description = "API du framework KBA - Clean Architecture avec multi-tenancy, sécurité JWT et validation",
+            Description = "API du framework KBA - Clean Architecture avec multi-tenancy, sécurité JWT et validation\n\n" +
+                         "## Comment utiliser l'API\n\n" +
+                         "1. **Initialisation** : Si c'est la première utilisation, créez le premier admin via `/api/init/first-admin`\n" +
+                         "2. **Authentification** : Utilisez `/api/auth/login` pour obtenir un token JWT\n" +
+                         "3. **Autorisation** : Cliquez sur le bouton 'Authorize' et entrez votre token\n" +
+                         "4. **Test** : Vous pouvez maintenant tester tous les endpoints protégés\n",
             Contact = new Microsoft.OpenApi.Models.OpenApiContact
             {
                 Name = "KBA Framework",
@@ -94,14 +103,16 @@ try
             }
         });
 
-        // Configuration JWT pour Swagger
+        // Configuration JWT pour Swagger avec support Bearer Token
         options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
         {
-            Description = "JWT Authorization header utilisant le schéma Bearer. Exemple: \"Authorization: Bearer {token}\"",
+            Description = "Entrez le token JWT avec le préfixe Bearer. Exemple: 'Bearer eyJhbGciOiJIUzI1Ni...'\n\n" +
+                         "Vous pouvez obtenir un token en utilisant l'endpoint /api/auth/login",
             Name = "Authorization",
             In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-            Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
-            Scheme = "Bearer"
+            Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT"
         });
 
         options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
@@ -118,6 +129,34 @@ try
                 Array.Empty<string>()
             }
         });
+
+        // Configurer les tags personnalisés pour les contrôleurs
+        options.TagActionsBy(api =>
+        {
+            if (api.GroupName != null)
+            {
+                return new[] { api.GroupName };
+            }
+
+            if (api.ActionDescriptor is Microsoft.AspNetCore.Mvc.Controllers.ControllerActionDescriptor controllerActionDescriptor)
+            {
+                var controllerName = controllerActionDescriptor.ControllerName;
+                // Mapper les noms de contrôleurs vers des tags lisibles
+                return controllerName switch
+                {
+                    "Auth" => new[] { "Authentication" },
+                    "Products" => new[] { "Products" },
+                    "Users" => new[] { "Users" },
+                    "Init" => new[] { "Initialization" },
+                    _ => new[] { controllerName }
+                };
+            }
+
+            return new[] { "Default" };
+        });
+
+        // Ordre des tags dans la documentation
+        options.OrderActionsBy(api => api.GroupName ?? api.RelativePath);
 
         // Inclure les commentaires XML
         var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
@@ -151,19 +190,27 @@ try
         app.UseSwaggerUI(c =>
         {
             c.SwaggerEndpoint("/swagger/v1/swagger.json", "KBA Framework API v1");
+            c.DocumentTitle = "KBA Framework API - Swagger UI";
+            c.DisplayRequestDuration();
+            c.EnableTryItOutByDefault();
         });
         app.UseReDoc(options =>
         {
             options.SpecUrl = "/swagger/v1/swagger.json";
-            options.DocumentTitle = "KBA Framework API v1";
+            options.DocumentTitle = "KBA Framework API Documentation";
+            options.RoutePrefix = "api-docs";
         });
     }
 
     // Utiliser Serilog pour les requêtes HTTP
     app.UseSerilogRequestLogging();
-
+    
     app.UseHttpsRedirection();
     app.UseCors("AllowAll");
+    
+    // Servir les fichiers statiques (pour la page d'accueil)
+    app.UseStaticFiles();
+    app.UseDefaultFiles();
     
     // Authentification et autorisation
     app.UseAuthentication();

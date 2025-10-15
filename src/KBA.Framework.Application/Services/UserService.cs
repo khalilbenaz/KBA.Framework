@@ -10,13 +10,15 @@ namespace KBA.Framework.Application.Services;
 public class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
+    private readonly ICurrentUserContext _currentUserContext;
 
     /// <summary>
     /// Constructeur
     /// </summary>
-    public UserService(IUserRepository userRepository)
+    public UserService(IUserRepository userRepository, ICurrentUserContext currentUserContext)
     {
         _userRepository = userRepository;
+        _currentUserContext = currentUserContext;
     }
 
     /// <inheritdoc />
@@ -48,9 +50,8 @@ public class UserService : IUserService
         if (existingUser != null)
             throw new InvalidOperationException($"Un utilisateur avec l'email '{dto.Email}' existe déjà.");
 
-        // Note: TenantId devrait être récupéré du contexte de l'utilisateur connecté
         var user = new User(
-            tenantId: null, // À remplacer par le TenantId du contexte
+            tenantId: _currentUserContext.TenantId,
             userName: dto.UserName,
             email: dto.Email
         );
