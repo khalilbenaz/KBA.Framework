@@ -27,13 +27,24 @@ public class Repository<TEntity, TKey> : IRepository<TEntity, TKey> where TEntit
     /// <inheritdoc />
     public virtual async Task<TEntity?> GetByIdAsync(TKey id, CancellationToken cancellationToken = default)
     {
+        // FindAsync utilise le cache de premier niveau, pas de AsNoTracking nécessaire
         return await _dbSet.FindAsync(new object[] { id! }, cancellationToken);
+    }
+
+    /// <summary>
+    /// Récupère une entité par son ID sans tracking (lecture seule)
+    /// </summary>
+    public virtual async Task<TEntity?> GetByIdAsNoTrackingAsync(TKey id, CancellationToken cancellationToken = default)
+    {
+        return await _dbSet.AsNoTracking()
+            .FirstOrDefaultAsync(e => e.Id!.Equals(id), cancellationToken);
     }
 
     /// <inheritdoc />
     public virtual async Task<List<TEntity>> GetListAsync(CancellationToken cancellationToken = default)
     {
-        return await _dbSet.ToListAsync(cancellationToken);
+        // Utiliser AsNoTracking pour les requêtes en lecture seule améliore les performances
+        return await _dbSet.AsNoTracking().ToListAsync(cancellationToken);
     }
 
     /// <inheritdoc />
@@ -63,5 +74,28 @@ public class Repository<TEntity, TKey> : IRepository<TEntity, TKey> where TEntit
     public virtual async Task<int> CountAsync(CancellationToken cancellationToken = default)
     {
         return await _dbSet.CountAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// Récupère une liste paginée d'entités
+    /// </summary>
+    public virtual async Task<List<TEntity>> GetPagedListAsync(
+        int skip, 
+        int take, 
+        CancellationToken cancellationToken = default)
+    {
+        return await _dbSet
+            .AsNoTracking()
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// Vérifie si une entité existe
+    /// </summary>
+    public virtual async Task<bool> ExistsAsync(TKey id, CancellationToken cancellationToken = default)
+    {
+        return await _dbSet.AnyAsync(e => e.Id!.Equals(id), cancellationToken);
     }
 }

@@ -21,6 +21,7 @@ public class ProductRepository : Repository<Product, Guid>, IProductRepository
     public async Task<List<Product>> GetActiveProductsAsync(CancellationToken cancellationToken = default)
     {
         return await _dbSet
+            .AsNoTracking()
             .Where(p => p.IsActive)
             .OrderBy(p => p.Name)
             .ToListAsync(cancellationToken);
@@ -30,6 +31,7 @@ public class ProductRepository : Repository<Product, Guid>, IProductRepository
     public async Task<List<Product>> SearchByNameAsync(string name, CancellationToken cancellationToken = default)
     {
         return await _dbSet
+            .AsNoTracking()
             .Where(p => p.Name.Contains(name))
             .OrderBy(p => p.Name)
             .ToListAsync(cancellationToken);
