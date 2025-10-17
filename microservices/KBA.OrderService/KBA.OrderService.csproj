@@ -19,16 +19,13 @@
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
     <PackageReference Include="Serilog.Sinks.Seq" Version="7.0.0" />
     <PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="8.0.0" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.60.0" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.60.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\KBA.Framework.Domain\KBA.Framework.Domain.csproj" />
     <ProjectReference Include="..\KBA.Framework.Grpc\KBA.Framework.Grpc.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Grpc.AspNetCore" Version="2.60.0" />
-    <PackageReference Include="Grpc.Net.Client" Version="2.60.0" />
   </ItemGroup>
 
 </Project>

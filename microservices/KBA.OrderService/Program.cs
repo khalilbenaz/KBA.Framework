@@ -1,53 +1,54 @@
 using System.Text;
-using KBA.IdentityService.Data;
-using KBA.IdentityService.Grpc;
-using KBA.IdentityService.Services;
+using KBA.OrderService.Data;
+using KBA.OrderService.Grpc;
+using KBA.OrderService.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 
-// Créer une configuration temporaire pour lire les settings
+// Cr�er une configuration temporaire pour lire les settings
 var tempConfig = new ConfigurationBuilder()
     .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("appsettings.json", optional: false)
     .Build();
 
-var seqUrl = tempConfig["Serilog:SeqUrl"] ?? "http://localhost:5341";
+var seqUrl = tempConfig["Serilog:SeqUrl"];
 
 // Configuration Serilog
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
-    .WriteTo.File("logs/identity-service-.log", rollingInterval: RollingInterval.Day)
+    .WriteTo.File("logs/order-service-.log", rollingInterval: RollingInterval.Day)
     .WriteTo.Seq(seqUrl)
-    .Enrich.WithProperty("Service", "IdentityService")
+    .Enrich.WithProperty("Service", "OrderService")
     .CreateLogger();
 
 try
 {
-    Log.Information("Démarrage du Identity Service on {SeqUrl}", seqUrl);
+    Log.Information("Starting Order Service");
 
     var builder = WebApplication.CreateBuilder(args);
 
     builder.Host.UseSerilog();
 
     // Database
-    builder.Services.AddDbContext<IdentityDbContext>(options =>
+    builder.Services.AddDbContext<OrderDbContext>(options =>
         options.UseSqlServer(
             builder.Configuration.GetConnectionString("DefaultConnection"),
-            b => b.MigrationsAssembly("KBA.IdentityService")));
+            b => b.MigrationsAssembly("KBA.OrderService")));
 
     // Services
-    builder.Services.AddScoped<IAuthService, AuthService>();
-    builder.Services.AddScoped<IUserService, UserService>();
-    builder.Services.AddScoped<JwtTokenService>();
+    builder.Services.AddScoped<IOrderServiceLogic, OrderServiceLogic>();
     
-    // gRPC
+    // HttpContextAccessor pour CorrelationId
+    builder.Services.AddHttpContextAccessor();
+    
+    // gRPC (Serveur et Client)
     builder.Services.AddGrpc();
 
     // JWT Authentication
     var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-    var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey manquante");
+    var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey missing");
 
     builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(options =>
@@ -72,10 +73,10 @@ try
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(c =>
     {
-        c.SwaggerDoc("v1", new() { Title = "KBA Identity Service", Version = "v1" });
+        c.SwaggerDoc("v1", new() { Title = "KBA Order Service", Version = "v1" });
         c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
         {
-            Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+            Description = "JWT Authorization header using the Bearer scheme",
             Name = "Authorization",
             In = Microsoft.OpenApi.Models.ParameterLocation.Header,
             Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
@@ -115,11 +116,10 @@ try
 
     var app = builder.Build();
 
-    // Middleware
     if (app.Environment.IsDevelopment())
     {
         app.UseSwagger();
-        app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Identity Service v1"));
+        app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Order Service v1"));
     }
 
     app.UseSerilogRequestLogging();
@@ -130,22 +130,22 @@ try
     app.MapHealthChecks("/health");
     
     // Map gRPC services
-    app.MapGrpcService<IdentityGrpcService>();
+    app.MapGrpcService<OrderGrpcService>();
 
     // Appliquer les migrations automatiquement
     using (var scope = app.Services.CreateScope())
     {
-        var db = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
+        var db = scope.ServiceProvider.GetRequiredService<OrderDbContext>();
         db.Database.Migrate();
-        Log.Information("Migrations appliquées avec succès");
+        Log.Information("Migrations applied successfully");
     }
 
-    Log.Information("Identity Service démarré sur {Urls}", string.Join(", ", builder.Configuration.GetSection("Urls").Get<string[]>() ?? new[] { "http://localhost:5001" }));
+    Log.Information("Order Service started on http://localhost:5005");
     app.Run();
 }
 catch (Exception ex)
 {
-    Log.Fatal(ex, "Identity Service s'est arrêté de manière inattendue");
+    Log.Fatal(ex, "Order Service failed to start");
 }
 finally
 {

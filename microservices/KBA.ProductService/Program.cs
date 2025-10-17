@@ -38,19 +38,12 @@ try
 
     // Services
     builder.Services.AddScoped<IProductServiceLogic, ProductServiceLogic>();
-    builder.Services.AddScoped<IPermissionServiceClient, PermissionServiceClient>();
+    
+    // gRPC Client pour Permission Service
+    builder.Services.AddScoped<IPermissionServiceGrpcClient, PermissionServiceGrpcClient>();
     
     // HttpContextAccessor pour accéder au CorrelationId
     builder.Services.AddHttpContextAccessor();
-
-    // HttpClient pour Permission Service
-    builder.Services.AddHttpClient("PermissionService", (serviceProvider, client) =>
-    {
-        var config = serviceProvider.GetRequiredService<IConfiguration>();
-        var baseUrl = config["ExternalServices:PermissionServiceUrl"] ?? "http://localhost:5004";
-        client.BaseAddress = new Uri(baseUrl);
-        client.Timeout = TimeSpan.FromSeconds(30);
-    });
 
     // JWT Authentication
     var jwtSettings = builder.Configuration.GetSection("JwtSettings");

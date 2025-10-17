@@ -1,5 +1,6 @@
 using System.Text;
 using KBA.PermissionService.Data;
+using KBA.PermissionService.Grpc;
 using KBA.PermissionService.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -44,6 +45,9 @@ try
 
     // Services
     builder.Services.AddScoped<IPermissionServiceLogic, PermissionServiceLogic>();
+    
+    // gRPC
+    builder.Services.AddGrpc();
 
     // JWT Authentication
     var jwtSettings = builder.Configuration.GetSection("JwtSettings");
@@ -128,6 +132,9 @@ try
     app.UseAuthorization();
     app.MapControllers();
     app.MapHealthChecks("/health");
+    
+    // Map gRPC services
+    app.MapGrpcService<PermissionGrpcService>();
 
     // Auto-apply migrations
     using (var scope = app.Services.CreateScope())
